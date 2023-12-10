@@ -1,3 +1,5 @@
+using Acq.VideoSearch.Core.Dto;
+using Acq.VideoSearch.Core.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Acq.VideoSearch.Controllers;
@@ -6,27 +8,26 @@ namespace Acq.VideoSearch.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
     private readonly ILogger<WeatherForecastController> _logger;
+    private readonly IWeatherService _weatherService;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(IWeatherService weatherService, ILogger<WeatherForecastController> logger)
     {
         _logger = logger;
+        _weatherService = weatherService;
     }
 
-    [HttpGet(Name = "GetWeatherForecast")]
-    public IEnumerable<WeatherForecast> Get()
+    [HttpPost("AddForecast")]
+    public async Task<IActionResult> AddWeatherForecast(WeatherCreateDto dto)
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateTime.Now.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        var results = await _weatherService.AddWeatherForecast(dto);
+        return Ok(results);
+    }
+
+    [HttpGet("GetAll")]
+    public async Task<IActionResult> GetAll()
+    {
+        var results = await _weatherService.GetAllWeatherForecasts();
+        return Ok(results);
     }
 }
